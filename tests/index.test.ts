@@ -1,3 +1,5 @@
 describe('test', () => {
-  expect('this').toEqual('this')
+  it('should work', () => {
+    expect('this').toEqual('this')
+  })
 })

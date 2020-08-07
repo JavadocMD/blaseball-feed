@@ -16,8 +16,8 @@
  *
  * with the correct number of dots.
  */
-import { readdirSync, statSync, readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
+const fs = require('fs')
+const path = require('path')
 
 /**
  * Crawl a directory recursively, returning file info.
@@ -29,9 +29,9 @@ function crawlDir(dir, depth = 0) {
   /** @type Array<[ string, number ]> */
   const empty = []
   // For each entity in this directory...
-  return readdirSync(dir).reduce((acc, curr) => {
-    const currPath = join(dir, curr)
-    if (statSync(currPath).isDirectory()) {
+  return fs.readdirSync(dir).reduce((acc, curr) => {
+    const currPath = path.join(dir, curr)
+    if (fs.statSync(currPath).isDirectory()) {
       // Directory: recurse and accumulate result.
       acc.concat(crawlDir(currPath, depth + 1))
     } else {
@@ -50,12 +50,12 @@ const regex = /require\("~\//g
  * @param {[string, number]} fileInfo file path and its depth from root
  */
 function fixImports([file, depth]) {
-  const text = readFileSync(file, 'utf-8')
-  const fix = text.match(regex).length > 0
+  const text = fs.readFileSync(file, 'utf-8')
+  const fix = text.match(regex)?.length > 0
   if (fix) {
     const dots = depth === 0 ? './' : '../'.repeat(depth)
     const next = text.replace(regex, `require("${dots}`)
-    writeFileSync(file, next)
+    fs.writeFileSync(file, next)
   }
   return fix
 }

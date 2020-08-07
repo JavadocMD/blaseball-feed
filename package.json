@@ -4,9 +4,10 @@
   "license": "MIT",
   "scripts": {
     "build": "yarn build:tsc && yarn build:fix",
-    "build:tsc": "tsc",
+    "build:tsc": "tsc -p tsconfig.build.json",
     "build:fix": "node ./scripts/fix-paths.js",
-    "start": "yarn build && node ./dist/index.js"
+    "start": "yarn build && node ./dist/index.js",
+    "test": "jest --testPathPattern=tests/.*\\.test\\.ts"
   },
   "devDependencies": {
     "@types/jest": "^26.0.8",
@@ -20,5 +21,8 @@
     "prettier": "^2.0.5",
     "ts-jest": "^26.1.4",
     "typescript": "^3.9.7"
+  },
+  "engines": {
+    "node": ">=14.7.0"
   }
 }
