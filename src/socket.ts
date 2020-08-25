@@ -1,34 +1,41 @@
 import * as Rx from 'rxjs'
 import * as R from 'rxjs/operators'
-import { default as createSocket } from 'socket.io-client'
+import { EventSource } from 'launchdarkly-eventsource'
 import { Data, Feed } from './data'
 
 /** A Feed for the live blaseball data. */
 export class BlaseballSocket implements Feed {
   public static listen() {
-    const socket = createSocket('https://blaseball.com')
-    return new BlaseballSocket(socket)
+    const source = new EventSource('https://www.blaseball.com/events/streamGameData', {
+      initialRetryDelayMillis: 2000,
+      maxBackoffMillis: 5000,
+      errorFilter: function errorFilter() {
+        return true
+      },
+    })
+    return new BlaseballSocket(source)
   }
 
   public readonly data: Rx.Observable<Data>
   public readonly log: Rx.Observable<string>
 
-  private constructor(private readonly socket: SocketIOClient.Socket) {
+  private constructor(private readonly source: EventSource) {
     // Log events.
-    const conx = Rx.fromEvent<void>(socket, 'connect') //
+    const open = Rx.fromEvent<void>(source, 'open') //
       .pipe(R.map(() => 'connected'))
 
-    const disx = Rx.fromEvent<string>(socket, 'disconnect') //
-      .pipe(R.map(reason => `disconnected (${reason})`))
+    const error = Rx.fromEvent<string>(source, 'error') //
+      .pipe(R.map(reason => `error (${JSON.stringify(reason)})`))
 
-    this.log = Rx.merge(conx, disx)
+    this.log = Rx.merge(open, error)
 
     // Data events. TODO: parse data
-    this.data = Rx.fromEvent<Data>(socket, 'gameDataUpdate') //
+    this.data = Rx.fromEvent<Data>(source, 'message') //
+      .pipe(R.map(e => JSON.parse(e.data).value))
       .pipe(R.distinctUntilChanged())
   }
 
   public close() {
-    this.socket.close()
+    this.source.close()
   }
 }
