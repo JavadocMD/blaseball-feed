@@ -13,3 +13,9 @@ $ ./blaseball-feed --team "Mexico City Wild Wings" | espeak-ng -v en-us -s 125
 ```
 
 Robotic and terrifying!
+
+But you can also use it to replay recorded history by feeding in a file containing game event data (one JSON event object per line). If I had such a file in a gzip archive, I could unzip it and pipe it in via standard input:
+
+```
+$ gunzip -c ./data.json.gz | ./blaseball-feed -st "Mexico City Wild Wings"
+```
