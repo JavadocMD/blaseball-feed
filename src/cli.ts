@@ -7,6 +7,7 @@ import * as BlaseballStream from './stream'
 function parseArgs() {
   return (
     yargs
+      .usage('Usage: $0 --team [TEAM]\nConcatenate Blaseball updates for TEAM to standard output.')
       // quiet
       .boolean('quiet')
       .default('quiet', false)
@@ -18,8 +19,8 @@ function parseArgs() {
       .demandOption('team')
       // ...
       .describe({
-        quiet: 'disable extraneous logging output (e.g., connection/disconnection messages)',
-        stdin: 'read input from stdin instead of the Blaseball live event stream',
+        quiet: 'disable log output (connect/disconnect messages)',
+        stdin: 'read input from stdin instead of the live event stream',
         team: 'the team to follow',
       })
       .alias({
@@ -27,7 +28,7 @@ function parseArgs() {
         stdin: ['s'],
         team: ['t'],
       })
-      .example('$0 -t "Mexico City Wild Wings"', 'Follow live updates to the Wild Wings game.').argv
+      .example('$0 -t "Mexico City Wild Wings"', 'Follow live updates to the Wings game.').argv
   )
 }
 
