@@ -1,8 +1,8 @@
 import * as R from 'rxjs/operators'
 import yargs from 'yargs'
 import { Feed, filter } from './data'
-import { BlaseballSocket } from './socket'
-import { InputStream } from './stdin'
+import * as BlaseballLive from './live'
+import * as BlaseballStream from './stream'
 
 function parseArgs() {
   return (
@@ -35,9 +35,9 @@ type Args = ReturnType<typeof parseArgs>
 
 function createFeed(stdin: Args['input']): Feed {
   if (stdin === true) {
-    return new InputStream(process.stdin)
+    return BlaseballStream.listen(process.stdin)
   } else {
-    return BlaseballSocket.listen()
+    return BlaseballLive.listen()
   }
 }
 

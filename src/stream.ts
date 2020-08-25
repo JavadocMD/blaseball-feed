@@ -5,7 +5,7 @@ import { StringDecoder } from 'string_decoder'
 import { Data, Feed } from './data'
 
 /** Transform stream which splits the input on newlines. */
-export const split = (delay = 500, r = /\r?\n/) => {
+function split(delay = 500, r = /\r?\n/): Transform {
   const enc = 'utf8'
   const dec = new StringDecoder(enc)
 
@@ -47,29 +47,25 @@ export const split = (delay = 500, r = /\r?\n/) => {
   })
 }
 
-/** A Feed for the live blaseball data. */
-export class InputStream implements Feed {
-  public readonly data: Rx.Observable<Data>
-  public readonly log: Rx.Observable<string>
+/** A Feed for blaseball data from a stream. */
+export function listen(stream: NodeJS.ReadableStream): Feed {
+  // Data events.
+  const output = new Rx.Subject<Data>()
+  const data = output.asObservable().pipe(R.distinctUntilChanged())
 
-  public constructor(private readonly stream: NodeJS.ReadableStream) {
-    // Log events.
-    this.log = Rx.empty()
+  // Start listening to the stream, publishing through to the data observable.
+  stream
+    .pipe(split())
+    .on('data', s => output.next(JSON.parse(s)))
+    .on('end', () => output.complete())
+    .on('close', () => output.complete())
+    .on('error', error => output.error(error))
 
-    // Data events.
-    const output = new Rx.Subject<Data>()
-    this.data = output.asObservable().pipe(R.distinctUntilChanged())
-
-    // Start listening to the stream, publishing through to the data observable.
-    stream
-      .pipe(split())
-      .on('data', s => output.next(JSON.parse(s)))
-      .on('end', () => output.complete())
-      .on('close', () => output.complete())
-      .on('error', error => output.error(error))
-  }
-
-  public close() {
-    this.stream.unpipe()
+  return {
+    log: Rx.empty(), // No relevant log events.
+    data,
+    close: () => {
+      stream.unpipe()
+    },
   }
 }
