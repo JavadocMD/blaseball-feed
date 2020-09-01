@@ -5,7 +5,7 @@ import { Data, Feed } from './data'
 
 /** A Feed for the live blaseball data. */
 export function listen(): Feed {
-  const source = new EventSource('https://www.blaseball.com/events/streamGameData', {
+  const source = new EventSource('https://www.blaseball.com/events/streamData', {
     initialRetryDelayMillis: 2000,
     maxBackoffMillis: 5000,
     errorFilter: function errorFilter() {
@@ -24,7 +24,7 @@ export function listen(): Feed {
 
   // Data events. TODO: parse data
   const data = Rx.fromEvent<Data>(source, 'message') //
-    .pipe(R.map(e => JSON.parse(e.data).value))
+    .pipe(R.map(e => JSON.parse(e.data).value.games))
     .pipe(R.distinctUntilChanged())
 
   return {
