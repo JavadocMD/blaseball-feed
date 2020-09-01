@@ -9,10 +9,7 @@
     "build:fix": "node ./scripts/fix-paths.js",
     "start": "yarn build && node ./dist/cli.js",
     "test": "jest --testPathPattern=tests/.*\\.test\\.ts",
-    "package": "yarn build && yarn package:win && yarn package:mac && yarn package:linux",
-    "package:win": "yarn pkg -t node14-win-x64 -o pkg/win/blaseball-feed.exe dist/cli.js",
-    "package:mac": "yarn pkg -t node14-macos-x64 -o pkg/mac/blaseball-feed dist/cli.js",
-    "package:linux": "yarn pkg -t node14-linux-x64 -o pkg/linux/blaseball-feed dist/cli.js"
+    "package": "yarn build && ./scripts/package.sh"
   },
   "dependencies": {
     "fp-ts": "^2.8.1",
