@@ -5,6 +5,7 @@ import { StringDecoder } from 'string_decoder'
 import { Data, Feed } from './data'
 
 /** Transform stream which splits the input on newlines. */
+// TODO: control delay from CLI args
 function split(delay = 500, r = /\r?\n/): Transform {
   const enc = 'utf8'
   const dec = new StringDecoder(enc)
